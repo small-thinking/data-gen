@@ -9,9 +9,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: data-gen/core
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -35,10 +32,10 @@ jobs:
       - name: Run tests with coverage
         run: |
           source .venv/bin/activate
-          pytest --cov=core --cov-report=xml --cov-fail-under=80
+          pytest --cov=data-gen --cov-report=xml --cov-fail-under=80
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-xml
-          path: data-gen/core/coverage.xml 
+          path: coverage.xml 
