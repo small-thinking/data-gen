@@ -50,8 +50,6 @@ backend/   # (future) Backend API
 
 ## Component Descriptions
 - **core/**: Implements the main logic for generating synthetic data for LLM post-training. (First component to be implemented)
-- **web/**: (Planned) Web-based user interface for data generation and management.
-- **backend/**: (Planned) API backend for orchestration and integration.
 
 ## Contributing
 - Contributions are welcome! Please see the contributing guidelines in each component folder.
