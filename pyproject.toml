@@ -10,7 +10,8 @@ readme = "README.md"
 
 [project.optional-dependencies]
 test = [
-  "pytest"
+  "pytest",
+  "pytest-cov"
 ]
 
 [build-system]
