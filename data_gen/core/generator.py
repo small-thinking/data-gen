@@ -1,59 +1,51 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
+from .llm_requester import LLMRequester
 
 
 class DataGenerator(ABC):
-    """Abstract base class for data generation using various LLM APIs."""
-    
-    def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key
-    
-    @abstractmethod
-    def generate_data(self, requirement: str, num_records: int) -> List[Dict[str, Any]]:
-        """Generate synthetic data based on user requirement.
-        
+    """Abstract base class for multi-step data generation using LLMRequester."""
+
+    def __init__(self, llm_requester: LLMRequester):
+        self.llm_requester = llm_requester
+
+    def generate_data(self, requirement: str, num_topics: int, num_requests_per_topic: int) -> List[Dict[str, Any]]:
+        """Main entry for the template pattern: orchestrates the data generation process.
+
         Args:
             requirement: Natural language description of data requirements
-            num_records: Number of records to generate
-            
+            num_topics: Number of broad topics to generate
+            num_requests_per_topic: Number of requests/questions per topic
         Returns:
             List of generated data records
         """
+        topics = self.generate_broad_topics(requirement, num_topics)
+        all_data = []
+        for topic in topics:
+            requests = self.generate_requests_for_topic(topic, num_requests_per_topic)
+            for req in requests:
+                prompt = self.generate_prompt_for_request(req)
+                response = self.llm_requester.request(prompt)
+                data = self.parse_llm_response(response)
+                all_data.append(data)
+        return all_data
+
+    @abstractmethod
+    def generate_broad_topics(self, requirement: str, num_topics: int) -> List[str]:
+        """Generate a list of broad topics from the requirement."""
         pass
-    
-    def _convert_requirement_to_prompts(self, requirement: str, num_records: int) -> List[str]:
-        """Convert user requirement to specific data generation prompts.
-        
-        Args:
-            requirement: Natural language data requirement
-            num_records: Number of records to generate
-            
-        Returns:
-            List of specific prompts for each record
-        """
-        # Enhanced prompt with better instructions for synthetic data generation
-        base_prompt = f"""You are a synthetic data generator. Generate
-            realistic synthetic data based on this requirement:
-            {requirement}
 
-            Instructions:
-            - Return only valid JSON without any additional text, explanations,
-            or markdown formatting
-            - The JSON should represent a single data record that matches the requirement
-            - Ensure the data is realistic and varied
-            - Use appropriate data types (strings, numbers, booleans, arrays, objects as needed)
-            - Make each record unique and realistic
+    @abstractmethod
+    def generate_requests_for_topic(self, topic: str, num_requests: int) -> List[str]:
+        """Generate a list of requests/questions for a given topic."""
+        pass
 
-            Generate one data record now:
-        """
-        
-        # Add slight variations to prompts to encourage diversity
-        prompts = []
-        for i in range(num_records):
-            if i == 0:
-                prompts.append(base_prompt)
-            else:
-                variation_prompt = base_prompt + f"\n\nMake this record distinct from previous records (this is record #{i+1})."
-                prompts.append(variation_prompt)
-        
-        return prompts
+    @abstractmethod
+    def generate_prompt_for_request(self, request: str) -> str:
+        """Generate a prompt for the LLM based on the request/question."""
+        pass
+
+    @abstractmethod
+    def parse_llm_response(self, response: str) -> Dict[str, Any]:
+        """Parse the LLM response into a data record."""
+        pass
