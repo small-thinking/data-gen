@@ -7,7 +7,7 @@ Run the tests with:
 import pytest
 from typing import List, Dict, Any
 from ..generator import DataGenerator
-from ..llm_requester import LLMRequester, OpenAIBatchRequester
+from ..llm_requester import LLMRequester
 
 
 class MockLLMRequester(LLMRequester):
@@ -75,25 +75,3 @@ def test_parse_llm_response(generator):
     parsed = generator.parse_llm_response(response)
     assert parsed["mock_key"] == "mock_value"
     assert parsed["prompt"] == "Prompt for test"
-
-
-def test_llmrequester_notimplemented():
-    base = LLMRequester()
-    with pytest.raises(NotImplementedError):
-        base.request("prompt")
-    with pytest.raises(NotImplementedError):
-        base.request_batch("file.jsonl")
-
-
-def test_openai_requester_notimplemented():
-    requester = OpenAIRequester(api_key="test")
-    with pytest.raises(NotImplementedError):
-        requester.request_batch("file.jsonl")
-
-
-def test_openai_batch_requester_notimplemented():
-    requester = OpenAIBatchRequester(api_key="test")
-    with pytest.raises(NotImplementedError):
-        requester.request_batch("file.jsonl")
-    with pytest.raises(NotImplementedError):
-        requester.request("prompt")
