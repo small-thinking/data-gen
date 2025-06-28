@@ -7,18 +7,6 @@ Run the tests with:
 import pytest
 from typing import List, Dict, Any
 from ..generator import DataGenerator
-from ..llm_requester import LLMRequester
-
-
-class MockLLMRequester(LLMRequester):
-    def request(self, prompt: str) -> str:
-        # Return a simple JSON string for testing
-        return '{"mock_key": "mock_value", "prompt": "%s"}' % prompt
-
-
-class MockBatchLLMRequester(LLMRequester):
-    def request_batch(self, input_file_path: str) -> str:
-        return "mock_batch_id"
 
 
 class TestDataGenerator(DataGenerator):
@@ -39,7 +27,11 @@ class TestDataGenerator(DataGenerator):
 
 @pytest.fixture
 def generator():
-    llm_requester = MockLLMRequester()
+    # Use a simple mock for LLMRequester
+    class DummyLLMRequester:
+        def request(self, prompt: str) -> str:
+            return '{"mock_key": "mock_value", "prompt": "%s"}' % prompt
+    llm_requester = DummyLLMRequester()
     return TestDataGenerator(llm_requester)
 
 
